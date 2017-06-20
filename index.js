@@ -13,56 +13,16 @@ const recursive = require('recursive-readdir');
 
 const updateStateAndReducer = require(path.resolve(`${__dirname}/updateStateAndReducer.js`));
 
-const ensureDirectoryExists = (dirPath, mask) => {
-    return new Promise((resolve, reject) => {
-        fs.mkdir(dirPath, mask, (err) => {
-            const shortDirPath = dirPath.split(process.cwd())[1];
-            if (err) {
-                if (err.code === 'EEXIST') {
-                    console.log(`${chalk.green('Success')} .${shortDirPath} already exists`);
-                    resolve(); // ignore the error if the folder already exists
-                } else {
-                    reject(err); // something else went wrong
-                }
-            } else {
-                console.log(`${chalk.green('Success')} .${shortDirPath} directory created`);
-                resolve(); // successfully created folder
-            }
-        });
-    });
-};
-
-const ensureFileExists = (filePath, data, noFail = false) => {
-    return new Promise((resolve, reject) => {
-        const prettyData = format({
-            text: data,
-            filePath: path.resolve(`.${path.sep}.eslintrc.js`),
-        });
-        fs.writeFile(filePath, prettyData, { flag: 'wx' }, (err) => {
-            const shortFilePath = filePath.split(process.cwd())[1];
-            if (err) {
-                if (!noFail) {
-                    // eslint-disable-next-line max-len
-                    console.log(`${chalk.bgRed.white.bold('Failure')} .${chalk.bold(shortFilePath)} already exists. This can only be used for new models`);
-                    reject(err);
-                } else {
-                    console.log(`${chalk.green('Success')} .${shortFilePath} already exists, not writing to it.`);
-                    resolve();
-                }
-            } else {
-                console.log(`${chalk.green('Success')} .${shortFilePath} created`);
-                resolve();
-            }
-        });
-    });
-};
-
+// Will be filled through the various processing methods
 let config = {};
+
+// Used by multiple methods, pause streams rather than create new ones.
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
 
+// Used in both processing passed in args and showing when -h|--help is used.
 const arg_options = [
     {
         name: 'help',
@@ -92,6 +52,7 @@ const arg_options = [
     }
 ];
 
+// If -h|--help is an arg, short circuit and show the help.
 if (Object.keys(argv).indexOf('h') > -1 || Object.keys(argv).indexOf('help') > -1) {
     const usage = getUsage([
         { header: 'Add Model', content: `
@@ -104,7 +65,69 @@ if (Object.keys(argv).indexOf('h') > -1 || Object.keys(argv).indexOf('help') > -
     process.exit();
 }
 
+// Separate from config in that it releates only to arg options.
 const processed_options = {};
+
+/**
+ * Used to ensure a directory exists.  If the error is that it exists, we
+ *   resolve the promise, all other errors get rejected.
+ *
+ * @param {String} dirPath
+ * @param {String} mask
+ */
+const ensureDirectoryExists = (dirPath, mask) => {
+    return new Promise((resolve, reject) => {
+        fs.mkdir(dirPath, mask, (err) => {
+            const shortDirPath = dirPath.split(process.cwd())[1];
+            if (err) {
+                if (err.code === 'EEXIST') {
+                    console.log(`${chalk.green('Success')} .${shortDirPath} already exists`);
+                    resolve(); // ignore the error if the folder already exists
+                } else {
+                    reject(err); // something else went wrong
+                }
+            } else {
+                console.log(`${chalk.green('Success')} .${shortDirPath} directory created`);
+                resolve(); // successfully created folder
+            }
+        });
+    });
+};
+
+/**
+ * Used to ensure a file exists.  If the error is that it exists, we resolve
+ *   the promise, all other errors get rejected.
+ *
+ * @param {String} filePath
+ * @param {String} data
+ * @param {Boolean} noFail
+ */
+const ensureFileExists = (filePath, data, noFail = false) => {
+    return new Promise((resolve, reject) => {
+        const prettyData = format({
+            text: data,
+            filePath: path.resolve(`.${path.sep}.eslintrc.js`),
+        });
+        fs.writeFile(filePath, prettyData, { flag: 'wx' }, (err) => {
+            const shortFilePath = filePath.split(process.cwd())[1];
+            if (err) {
+                if (!noFail) {
+                    // eslint-disable-next-line max-len
+                    console.log(`${chalk.bgRed.white.bold('Failure')} .${chalk.bold(shortFilePath)} already exists. This can only be used for new models`);
+                    reject(err);
+                } else {
+                    console.log(`${chalk.green('Success')} .${shortFilePath} already exists, not writing to it.`);
+                    resolve();
+                }
+            } else {
+                console.log(`${chalk.green('Success')} .${shortFilePath} created`);
+                resolve();
+            }
+        });
+    });
+};
+
+
 const processArgs = () => {
     Object.keys(argv).forEach((arg) => {
         const arg_obj = arg_options.find((option) => {
