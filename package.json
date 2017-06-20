@@ -1,5 +1,5 @@
 {
-  "name": "redux-boilerplate-remover",
+  "name": "crud-foyer",
   "version": "0.0.1",
   "description": "Fills in boilerplate for you",
   "main": "index.js",
@@ -10,7 +10,7 @@
     "redux"
   ],
   "bin": {
-    "add_model": "index.js"
+    "crud-foyer": "index.js"
   },
   "author": "Croscon",
   "license": "MIT",
