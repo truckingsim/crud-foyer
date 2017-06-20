@@ -1,3 +1,5 @@
 node_modules
 .vscode
 dist
+example/resources/js/**/*js
+example/tests/js/**/*.js
