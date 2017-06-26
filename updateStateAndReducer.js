@@ -208,6 +208,7 @@ const updateRootReducer = (name) => {
                 filePath: path.resolve('./.eslintrc.js'),
             });
 
+
             resolve(prettyData);
         });
     });
@@ -226,6 +227,7 @@ const writeFile = (filePath, data) => {
             text: data,
             filePath: path.resolve('./.eslintrc.js'),
         });
+
         fs.writeFile(filePath, prettyData, { flag: 'w' }, (err) => {
             const shortFilePath = filePath.split(process.cwd())[1];
             if (err) {
