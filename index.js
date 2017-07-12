@@ -101,6 +101,8 @@ const ensureDirectoryExists = (dirPath, mask) => {
  * @param {String} filePath
  * @param {String} data
  * @param {Boolean} noFail
+ *
+ * @return {Promise}
  */
 const ensureFileExists = (filePath, data, noFail = false) => {
     return new Promise((resolve, reject) => {
@@ -127,7 +129,13 @@ const ensureFileExists = (filePath, data, noFail = false) => {
     });
 };
 
-
+/**
+ * Processes the args that are passed in through the command line
+ *   makes sure they exist as an option and if they do adds them
+ *   to the processed_options object.
+ *
+ * @return {Object}
+ */
 const processArgs = () => {
     Object.keys(argv).forEach((arg) => {
         const arg_obj = arg_options.find((option) => {
@@ -142,6 +150,12 @@ const processArgs = () => {
     return processed_options;
 };
 
+/**
+ *
+ * @param {String} templatesPath
+ *
+ * @return {Array.<String>}
+ */
 const getTemplates = (templatesPath) => {
     let abssTemplatePath = path.resolve(templatesPath);
     abssTemplatePath = abssTemplatePath.endsWith(path.sep) ? abssTemplatePath : `${abssTemplatePath}${path.sep}`;
@@ -169,7 +183,7 @@ const start = () => {
     });
 
     optional_options.forEach((arg, index) => {
-        // If we already have what we need for this option, we can remove it from the required list.
+        // If we already have what we need for this option, we can remove it from the optional list.
         if (processed_options[arg]) {
             optional_options.splice(index, 1);
         }
